@@ -10,9 +10,23 @@ import (
 )
 
 const PORT = 42069 // Nod to prime
-var pages = library.GetPages()
+
+type Pages map[string]*library.Page
+
+var pages Pages = make(map[string]*library.Page)
+
+func SetUpPages() Pages {
+	if len(pages) == 0 {
+		pages["index"] = library.NewPage("Index", "index", "World")
+	}
+
+	return pages
+}
 
 func main() {
+	// Set up pages
+	SetUpPages()
+
 	// Create a new instance of Echo
 	e := echo.New()
 	e.Renderer = library.NewTemplates()
@@ -22,13 +36,15 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// Routes
-	e.GET("/", hello)
+	e.GET("/", indexHandler)
 
 	// Start server
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", PORT)))
 }
 
 // handler
-func hello(c echo.Context) error {
-	return c.Render(http.StatusOK, "index", pages["index"])
+func indexHandler(c echo.Context) error {
+	page := pages["index"]
+
+	return c.Render(http.StatusOK, page.TemplateName, page)
 }
