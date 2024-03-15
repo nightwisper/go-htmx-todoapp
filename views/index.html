@@ -5,9 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ .Title }}</title>
     <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+
+    <link href="./css/styles.css" rel="stylesheet">
 </head>
 <body>
-    <h1>Hello {{ .Data }}</h1>
+    <header style="display:flex; flex-direction:row; width: 100%;">
+        <h1>ToDos</h1>
+
+        <nav>
+            <a href="/todo">All</a>
+            <a href="/todo?done=true">Done</a>
+            <a href="/todo?done=false">Pending</a>
+        </nav>
+    </header>
+    <div style="display:flex; flex-direction:column;">
+        {{ template "todo" . }}
+    </div>
 </body>
 </html>
+{{ end }}
+
+{{ block "todo" . }}
+
+    {{ range .Data }}
+        <div style="display:flex; flex-direction:row;">
+            <input id="chkTodo_{{ .ID }}" name="chkTodo_{{ .ID }}" type="checkbox" {{ if .Done }}checked{{ end }} onchange="htmx.patch(this.closest('form'))">
+            <form action="/todo/{{ .ID }}" method="put">
+                <input type="hidden" name="_method" value="PATCH">
+            </form>
+            <label for="chkTodo_{{ .ID }}">{{ .Title }}</label>
+        </div>
+    {{ end }}
+
 {{ end }}
